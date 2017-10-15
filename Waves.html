@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>waves</title>
+</head>
+<body>
+<canvas id = "canvas"></canvas>
+<script src = "processing.min.js.txt"></script>
+<script type = "application/processing" data-processing-target = "canvas">
+size(window.innerWidth, window.innerHeight);
+var amplitude = 70;
+var increaseRate = 0.115;
+var particle = function(x, y, i, c){
+	this.x = x;
+	this.y = y;
+	this.i = i;
+	this.h = sin(this.i);
+	this.h2 = 0;
+	this.c = c;
+};
+particle.prototype.display = function(){
+	translate(this.x, this.y);
+	stroke(0);
+	strokeWeight(1);
+	line(0, 0, 0, this.h2);
+	noStroke();
+	fill(this.c);
+	ellipse(0, this.h2, 27, 27);
+	resetMatrix();
+};
+particle.prototype.update = function(){
+	this.h = sin(this.i);
+	this.i += increaseRate;
+	this.h2 = map(this.h, -1, 1, -amplitude, amplitude);
+};
+
+var slider = function(x, y, min, max, value){
+	this.x = x;
+	this.y = y;
+	this.min = min;
+	amplitude = this.min;
+	this.distance = this.min;
+	this.max = max;
+	this.value = value;
+};
+slider.prototype.display = function(){
+	rectMode(CENTER);
+	strokeWeight(3);
+	stroke(220);
+	fill(255);
+	rect(this.x, this.y, 170, 80, 10);
+	textAlign(CENTER, CENTER);
+	fill(50);
+	textFont(createFont("monospace"), 16);
+	text(this.value, this.x-38.5, this.y-20);
+	text(amplitude, this.x-38.5, this.y-3);
+	translate(this.x, this.y+20);
+	stroke(230);
+	strokeWeight(1.3);
+	fill(200);
+	rect(0, 0, 140, 10, 5);
+	ellipse(map(this.distance, this.min, this.max, -70, 70), 0, 15, 15);
+	resetMatrix();
+};
+slider.prototype.slide = function(){
+	var mX = mouseX; var mY = mouseY;
+	var X = this.x + map(this.distance, this.min, this.max, -70, 70); var Y = this.y+20;
+	if(dist(mX, mY, X, Y) < 7.5 && mouseX > this.x-70&&mouseX < this.x+70){
+		this.distance = map(mX, this.x-70, this.x+70, this.min, this.max);
+		amplitude = this.distance;
+	}
+};
+
+var is =0;
+var particles = [];
+var r, g, b;
+r = 0;
+g = 0;
+b = 0;
+var cs = color(r, g, b);
+for(var i = 0; i < width; i+= 30){
+	cs = color(r, g, b);
+	particles.push(new particle(i, height/2, is, cs));
+	is += increaseRate;
+	g += width/255;
+	b += width/255;
+}
+var slideAmpl = new slider(90, 50, 30, 130, "amplitude");
+mouseDragged = function(){
+	slideAmpl.slide();
+};
+draw = function(){
+	background(255);
+	for(var i = 0; i < particles.length; i++){
+		var p = particles[i];
+		p.update();
+		p.display();
+	}
+	slideAmpl.display();
+};
+</script>
+</body>
+</html>
